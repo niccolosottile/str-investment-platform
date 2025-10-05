@@ -1,0 +1,1 @@
+# Short Term Rental (STR) Investment Platform
