@@ -3,26 +3,30 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { useLocationSearch, Location as LocationType } from "@/hooks/use-location-search";
+import { useLocationSearch } from "@/hooks/use-location-search";
 import { LocationSearchBar } from "@/components/features/LocationSearchBar";
 import { PopularLocationCard } from "@/components/features/PopularLocationCard";
+import { TravelTimeFilter } from "@/components/features/TravelTimeFilter";
+import { LocationPermissionPrompt } from "@/components/features/LocationPermissionPrompt";
+import { DataQualityBadge } from "@/components/common/DataQualityBadge";
+import { LocationDistanceInfo } from "@/components/common/LocationDistanceInfo";
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { clearResultsData } from '@/lib/session';
+import { useUserLocation } from "@/contexts/UserLocationContext";
+import type { LocationSearchResult, Location } from "@/types";
 
 interface LocationSelectorProps {
-  onLocationSelect: (location: LocationType) => void;
+  onLocationSelect: (location: Location) => void;
 }
 
-// MapPlaceholder remains here as it's specific to this feature and small
 function MapPlaceholder({
   loading,
   data,
   onSelect,
 }: {
   loading: boolean;
-  data: LocationType[] | null;
-  onSelect: (l: LocationType) => void;
+  data: LocationSearchResult[] | null;
+  onSelect: (l: Location) => void;
 }) {
   if (loading) {
     return (
@@ -35,7 +39,7 @@ function MapPlaceholder({
       </Card>
     );
   }
-
+  
   if (data && data.length > 0) {
     return (
       <Card className="card-metric">
@@ -43,12 +47,39 @@ function MapPlaceholder({
           <div className="space-y-4">
             <h3 className="text-xl font-semibold">Search Results</h3>
             {data.map((loc, i) => (
-              <div key={i} className="flex items-center justify-between">
-                <div>
-                  <div className="font-medium">{loc.city}</div>
+              <div key={i} className="flex items-start justify-between gap-4 p-4 rounded-lg border hover:bg-accent/50 transition-colors">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-start gap-2 flex-wrap">
+                    <div className="font-medium text-lg">{loc.city}</div>
+                    <DataQualityBadge quality={loc.dataAvailability} />
+                  </div>
                   <div className="text-sm text-muted-foreground">{loc.address}</div>
+                  {loc.distanceFromUser && (
+                    <LocationDistanceInfo
+                      distanceKm={loc.distanceFromUser.km}
+                      drivingTimeMinutes={loc.distanceFromUser.drivingTime}
+                      isWithinDayTrip={loc.distanceFromUser.isWithinDayTrip}
+                      variant="compact"
+                    />
+                  )}
+                  {loc.propertyCount && (
+                    <div className="text-xs text-muted-foreground">
+                      ~{loc.propertyCount} properties available
+                    </div>
+                  )}
                 </div>
-                <Button onClick={() => onSelect(loc)}>Analyze</Button>
+                <Button 
+                  onClick={() => onSelect({
+                    lat: loc.coordinates.lat,
+                    lng: loc.coordinates.lng,
+                    city: loc.city,
+                    country: loc.country,
+                    address: loc.address,
+                  })}
+                  className="btn-investment"
+                >
+                  Analyze
+                </Button>
               </div>
             ))}
           </div>
@@ -56,7 +87,7 @@ function MapPlaceholder({
       </Card>
     );
   }
-
+  
   return (
     <Card className="card-metric">
       <CardContent className="p-8">
@@ -76,23 +107,22 @@ function MapPlaceholder({
 }
 
 export const LocationSelector = memo(function LocationSelector({ onLocationSelect }: LocationSelectorProps) {
-  const { searchQuery, setSearchQuery, search, data, loading, error, popularLocations } = useLocationSearch();
-
+  const { searchQuery, setSearchQuery, search, data, loading, error, popularLocations, autocomplete, recentSearches, refreshRecentSearches } = useLocationSearch();
+  const { currentLocation, requestLocation, isLoadingLocation, locationError } = useUserLocation();
+  
   const handleSearch = useCallback(async () => {
-    // Clear any previously persisted results to avoid using stale analysis when a new search starts
     clearResultsData();
     await search();
   }, [search]);
-
+  
   const handleSelect = useCallback(
-    (loc: LocationType) => {
-      // Starting a new analysis for the selected location — clear previous results
+    (loc: Location) => {
       clearResultsData();
       onLocationSelect(loc);
     },
     [onLocationSelect],
   );
-
+  
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div className="text-center space-y-6 py-12">
@@ -103,9 +133,34 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">Analyze short-term rental opportunities across Europe with real market data and AI-powered insights</p>
         </div>
-
-        <LocationSearchBar value={searchQuery} onChange={setSearchQuery} onSearch={handleSearch} loading={loading} />
+        <LocationSearchBar 
+          value={searchQuery} 
+          onChange={setSearchQuery} 
+          onSearch={handleSearch} 
+          loading={loading}
+          autocomplete={autocomplete}
+          recentSearches={recentSearches}
+          onRefreshRecent={refreshRecentSearches}
+        />
       </div>
+
+      {/* Location permission prompt if not granted */}
+      {!currentLocation && (
+        <div className="max-w-2xl mx-auto">
+          <LocationPermissionPrompt
+            onRequestLocation={requestLocation}
+            isLoading={isLoadingLocation}
+            error={locationError}
+          />
+        </div>
+      )}
+
+      {/* Travel time filter - only show if location is available */}
+      {currentLocation && (
+        <div className="max-w-2xl mx-auto">
+          <TravelTimeFilter />
+        </div>
+      )}
 
       {error && (
         <div role="alert" className="mx-auto max-w-2xl">
@@ -129,10 +184,16 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
 
       <div className="space-y-6">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-foreground">Popular Investment Markets</h2>
-          <p className="text-muted-foreground">Start with proven markets or explore new opportunities</p>
+          <h2 className="text-3xl font-bold text-foreground">
+            {currentLocation ? 'Opportunities Near You' : 'Popular Investment Markets'}
+          </h2>
+          <p className="text-muted-foreground">
+            {currentLocation 
+              ? 'Nearby locations within your travel range' 
+              : 'Start with proven markets or explore new opportunities'
+            }
+          </p>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {popularLocations.map((loc, i) => (
             <PopularLocationCard key={i} item={loc} onSelect={handleSelect} />
@@ -154,4 +215,5 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
     </div>
   );
 });
+
 LocationSelector.displayName = "LocationSelector";

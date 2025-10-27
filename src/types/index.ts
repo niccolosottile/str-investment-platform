@@ -1,5 +1,3 @@
-// Core type definitions for the application
-
 export interface Location {
   lat: number;
   lng: number;
@@ -38,4 +36,34 @@ export interface InvestmentResults {
   competitorCount: number;
   marketScore: number;
   confidence: "high" | "medium" | "low";
+}
+
+export interface LocationSearchResult {
+  coordinates: { lat: number; lng: number };
+  address: string;
+  city: string;
+  region: string;
+  country: string;
+  distanceFromUser?: {
+    km: number;
+    drivingTime: number; // minutes
+    isWithinDayTrip: boolean; // Can visit and return same day
+  };
+  dataAvailability: 'high' | 'medium' | 'low';
+  lastUpdated?: Date;
+  propertyCount?: number;
+}
+
+export interface UserLocationContext {
+  currentLocation: { lat: number; lng: number } | null;
+  searchRadius: number; // km
+  maxDrivingTime: number; // hours
+  preferredRegions: string[];
+  locationPermissionGranted: boolean;
+}
+
+export interface GeolocationError {
+  code: number;
+  message: string;
+  type: 'permission_denied' | 'position_unavailable' | 'timeout' | 'unsupported';
 }

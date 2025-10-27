@@ -2,15 +2,25 @@ import React, { memo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin, TrendingUp, Users, DollarSign } from "lucide-react";
-import { PopularLocation, Location as LocationType } from "@/hooks/use-location-search";
+import { LocationDistanceInfo } from "@/components/common/LocationDistanceInfo";
+import { useUserLocation } from "@/contexts/UserLocationContext";
+import { enrichLocationWithDistance } from "@/lib/utils/distance";
+import { PopularLocation, Location } from "@/types";
 
 export const PopularLocationCard = memo(function PopularLocationCard({
   item,
   onSelect,
 }: {
   item: PopularLocation;
-  onSelect: (l: LocationType) => void;
+  onSelect: (l: Location) => void;
 }) {
+  const { currentLocation } = useUserLocation();
+  
+  // Calculate distance info if user location is available
+  const distanceInfo = currentLocation 
+    ? enrichLocationWithDistance(item.location, currentLocation)
+    : undefined;
+
   return (
     <Card
       className="card-metric cursor-pointer hover:scale-[1.02] transition-transform duration-300"
@@ -30,6 +40,17 @@ export const PopularLocationCard = memo(function PopularLocationCard({
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Distance info if available */}
+        {distanceInfo && (
+          <LocationDistanceInfo
+            distanceKm={distanceInfo.km}
+            drivingTimeMinutes={distanceInfo.drivingTime}
+            isWithinDayTrip={distanceInfo.isWithinDayTrip}
+            variant="compact"
+            className="pb-2 border-b"
+          />
+        )}
+        
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center">
             <div className="flex items-center justify-center mb-1">

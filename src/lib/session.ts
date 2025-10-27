@@ -1,6 +1,8 @@
 // Simple session persistence helpers for wizard and results state
 const WIZARD_KEY = "str:wizard:location";
 const RESULTS_KEY = "str:results:data";
+const USER_LOCATION_KEY = "str:user:location";
+const LOCATION_PERMISSION_KEY = "str:user:locationPermission";
 
 export function saveWizardLocation(location: any) {
   try {
@@ -53,5 +55,60 @@ export function clearResultsData() {
     sessionStorage.removeItem(RESULTS_KEY);
   } catch (e) {
     console.warn("Failed to clear results data from sessionStorage", e);
+  }
+}
+
+// User location context persistence
+export function saveUserLocation(location: { lat: number; lng: number }) {
+  try {
+    localStorage.setItem(USER_LOCATION_KEY, JSON.stringify(location));
+  } catch (e) {
+    console.warn("Failed to save user location to localStorage", e);
+  }
+}
+
+export function loadUserLocation(): { lat: number; lng: number } | null {
+  try {
+    const raw = localStorage.getItem(USER_LOCATION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to parse user location from localStorage", e);
+    return null;
+  }
+}
+
+export function clearUserLocation() {
+  try {
+    localStorage.removeItem(USER_LOCATION_KEY);
+  } catch (e) {
+    console.warn("Failed to clear user location from localStorage", e);
+  }
+}
+
+export function saveLocationPermission(granted: boolean) {
+  try {
+    localStorage.setItem(LOCATION_PERMISSION_KEY, JSON.stringify(granted));
+  } catch (e) {
+    console.warn("Failed to save location permission to localStorage", e);
+  }
+}
+
+export function loadLocationPermission(): boolean | null {
+  try {
+    const raw = localStorage.getItem(LOCATION_PERMISSION_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to parse location permission from localStorage", e);
+    return null;
+  }
+}
+
+export function clearLocationPermission() {
+  try {
+    localStorage.removeItem(LOCATION_PERMISSION_KEY);
+  } catch (e) {
+    console.warn("Failed to clear location permission from localStorage", e);
   }
 }
