@@ -6,11 +6,11 @@ import { ChevronRight } from "lucide-react";
 import { useInvestmentWizard } from "@/hooks/useInvestmentWizard";
 import { Skeleton } from "@/components/common/Skeleton";
 import { cn } from "@/lib/utils/utils";
-import { InvestmentWizardHeader } from "@/components/features/InvestmentWizardHeader";
-import { InvestmentTypeStep } from "@/components/features/InvestmentTypeStep";
-import { BudgetStep } from "@/components/features/BudgetStep";
-import { PropertyStep } from "@/components/features/PropertyStep";
-import { GoalsStep } from "@/components/features/GoalsStep";
+import { InvestmentWizardHeader } from "@/components/features/wizard/InvestmentWizardHeader";
+import { InvestmentTypeStep } from "@/components/features/wizard/InvestmentTypeStep";
+import { BudgetStep } from "@/components/features/wizard/BudgetStep";
+import { PropertyStep } from "@/components/features/wizard/PropertyStep";
+import { GoalsStep } from "@/components/features/wizard/GoalsStep";
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import type { Location } from "@/types";
 

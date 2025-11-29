@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import { Search, Navigation, Loader2, X } from "lucide-react";
 import { useUserLocation } from "@/contexts/UserLocationContext";
-import { AutocompleteDropdown } from "@/components/features/AutocompleteDropdown";
+import { AutocompleteDropdown } from "@/components/features/location/AutocompleteDropdown";
 import { removeRecentSearch, saveRecentSearch } from "@/lib/utils/localStorage";
 import { cn } from "@/lib/utils/utils";
 import type { GeocodingResult } from "@/lib/utils/geocoding";
@@ -18,6 +18,9 @@ export function LocationSearchBar({
   autocomplete,
   recentSearches,
   onRefreshRecent,
+  showSearchInput = true,
+  showLocationText = true,
+  searchedCityName = null,
 }: {
   value: string;
   onChange: (v: string) => void;
@@ -35,6 +38,9 @@ export function LocationSearchBar({
   };
   recentSearches?: RecentSearch[];
   onRefreshRecent?: () => void;
+  showSearchInput?: boolean;
+  showLocationText?: boolean;
+  searchedCityName?: string | null;
 }) {
   const { 
     currentLocation, 
@@ -83,10 +89,12 @@ export function LocationSearchBar({
 
   return (
     <div className="max-w-md mx-auto space-y-3">
-      <label htmlFor="location-search" className="sr-only">
-        Search location
-      </label>
-      <Popover open={autocomplete?.isOpen} onOpenChange={(open) => {
+      {showSearchInput && (
+        <>
+          <label htmlFor="location-search" className="sr-only">
+            Search location
+          </label>
+          <Popover open={autocomplete?.isOpen} onOpenChange={(open) => {
         // Only allow closing, not opening - opening is handled by onFocus
         if (!open) {
           autocomplete?.handleClose();
@@ -198,14 +206,16 @@ export function LocationSearchBar({
           )}
         </PopoverContent>
       </Popover>
+        </>
+      )}
 
       {/* Location status or enable button */}
-      {currentLocation && locationName ? (
+      {((currentLocation && locationName) || searchedCityName) && showLocationText ? (
         <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
           <Navigation className="h-4 w-4 text-primary" />
-          <span>Searching near <span className="font-medium text-foreground">{locationName}</span></span>
+          <span>Searching near <span className="font-medium text-foreground">{searchedCityName || locationName}</span></span>
         </div>
-      ) : showLocationButton && (
+      ) : showLocationButton && showLocationText ? (
         <Button
           variant="outline"
           size="sm"
@@ -228,7 +238,7 @@ export function LocationSearchBar({
             </>
           )}
         </Button>
-      )}
+      ) : null}
       
       {locationError && (
         <p className="text-xs text-center text-destructive">{locationError}</p>

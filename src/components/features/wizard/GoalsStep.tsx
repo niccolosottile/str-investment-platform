@@ -1,6 +1,6 @@
 import React from 'react';
 import { TrendingUp, DollarSign, Clock } from 'lucide-react';
-import { InvestmentOptionCard } from './InvestmentOptionCard';
+import { InvestmentOptionCard } from '@/components/features/cards/InvestmentOptionCard';
 
 interface Props {
   goals: 'max-roi' | 'stable-income' | 'quick-payback';

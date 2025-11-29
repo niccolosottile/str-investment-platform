@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/layouts/DashboardLayout";
-import { ResultsDashboard } from "@/components/features/ResultsDashboard";
+import { ResultsDashboard } from "@/components/features/results/ResultsDashboard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";

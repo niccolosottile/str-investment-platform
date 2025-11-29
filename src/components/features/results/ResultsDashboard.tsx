@@ -9,7 +9,7 @@ import { ResultsMetrics } from './ResultsMetrics';
 import { MarketAnalysis } from './MarketAnalysis';
 import { CompetitionAnalysis } from './CompetitionAnalysis';
 import { SeasonalAnalysis } from './SeasonalAnalysis';
-import { InvestmentBreakdown } from './InvestmentBreakdown';
+import { InvestmentBreakdown } from '@/components/features/cards/InvestmentBreakdown';
 import type { InvestmentData } from '@/types';
 
 interface ResultsDashboardProps {

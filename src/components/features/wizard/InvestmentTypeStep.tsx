@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingCart, Key } from 'lucide-react';
-import { InvestmentOptionCard } from './InvestmentOptionCard';
+import { InvestmentOptionCard } from '@/components/features/cards/InvestmentOptionCard';
 
 interface Props {
   investmentType: 'buy' | 'rent';

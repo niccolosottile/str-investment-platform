@@ -3,6 +3,7 @@ const WIZARD_KEY = "str:wizard:location";
 const RESULTS_KEY = "str:results:data";
 const USER_LOCATION_KEY = "str:user:location";
 const LOCATION_PERMISSION_KEY = "str:user:locationPermission";
+const LOCATION_SELECTOR_STATE_KEY = "str:locationSelector:state";
 
 export function saveWizardLocation(location: any) {
   try {
@@ -110,5 +111,37 @@ export function clearLocationPermission() {
     localStorage.removeItem(LOCATION_PERMISSION_KEY);
   } catch (e) {
     console.warn("Failed to clear location permission from localStorage", e);
+  }
+}
+
+// Location Selector state persistence
+export function saveLocationSelectorState(state: {
+  searchCenter: { lat: number; lng: number } | null;
+  filters: any;
+  selectedOpportunityId: string | null;
+}) {
+  try {
+    sessionStorage.setItem(LOCATION_SELECTOR_STATE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.warn("Failed to save location selector state to sessionStorage", e);
+  }
+}
+
+export function loadLocationSelectorState() {
+  try {
+    const raw = sessionStorage.getItem(LOCATION_SELECTOR_STATE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    console.warn("Failed to parse location selector state from sessionStorage", e);
+    return null;
+  }
+}
+
+export function clearLocationSelectorState() {
+  try {
+    sessionStorage.removeItem(LOCATION_SELECTOR_STATE_KEY);
+  } catch (e) {
+    console.warn("Failed to clear location selector state from sessionStorage", e);
   }
 }

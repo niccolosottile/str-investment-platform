@@ -48,8 +48,7 @@ export function estimateDrivingTime(distanceKm: number): number {
  * @returns Boolean indicating if it's within day trip range
  */
 export function isWithinDayTrip(drivingTimeMinutes: number): boolean {
-  const maxDayTripHours = 4;
-  return drivingTimeMinutes <= maxDayTripHours * 60;
+  return drivingTimeMinutes <= 240; // 4 hours = 240 minutes
 }
 
 /**

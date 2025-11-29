@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import WizardLayout from "@/components/layouts/WizardLayout";
-import { InvestmentWizard } from "@/components/features/InvestmentWizard";
+import { InvestmentWizard } from "@/components/features/wizard/InvestmentWizard";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
@@ -44,7 +44,10 @@ const Wizard = () => {
     <WizardLayout backElement={backElement}>
       <div className="animate-slide-up">
         <ErrorBoundary onReset={() => navigate("/", { replace: true })}>
-          <InvestmentWizard location={selectedLocation} onComplete={handleComplete} />
+          <InvestmentWizard 
+            location={selectedLocation} 
+            onComplete={handleComplete}
+          />
         </ErrorBoundary>
       </div>
     </WizardLayout>

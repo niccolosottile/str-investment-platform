@@ -4,6 +4,10 @@ export interface Location {
   city: string;
   country: string;
   address: string;
+  region?: string;
+  distanceKm?: number;
+  drivingTimeMin?: number;
+  opportunityData?: OpportunityResult; // Full opportunity data when coming from analysis
 }
 
 export interface LocationMetrics {
@@ -67,3 +71,41 @@ export interface GeolocationError {
   message: string;
   type: 'permission_denied' | 'position_unavailable' | 'timeout' | 'unsupported';
 }
+
+export interface OpportunityResult {
+  id: string;
+  coordinates: { lat: number; lng: number };
+  city: string;
+  region: string;
+  country: string;
+  distanceKm: number;
+  drivingTimeMin: number;
+  previewMetrics: {
+    estimatedMonthlyRevenue: number;
+    estimatedROI: number;
+  };
+  dataAvailability: 'high' | 'medium' | 'low';
+  lastUpdated?: Date;
+  propertyCount?: number;
+}
+
+export interface NearbyLocation {
+  id: string;
+  city: string;
+  country: string;
+  coordinates: { lat: number; lng: number };
+}
+
+export interface OpportunitiesFilters {
+  radiusKm?: number;
+  maxDrivingTimeMin?: number;
+  devMode?: boolean;
+}
+
+export interface UseOpportunitiesOptions {
+  origin: { lat: number; lng: number } | null;
+  filters?: OpportunitiesFilters;
+  enabled?: boolean;
+}
+
+export * from './map';

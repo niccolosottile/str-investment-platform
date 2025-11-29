@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { LocationSelector } from "@/components/features/LocationSelector";
+import { LocationSelector } from "@/components/features/location/LocationSelector";
 import { saveWizardLocation, clearResultsData } from "@/lib/session";
 import type { Location } from "@/types";
 import { ErrorBoundary } from '@/components/common/ErrorBoundary';

@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import type { Location } from '@/types';
+import type { Location, OpportunityResult } from '@/types';
+import { saveWizardLocation, loadWizardLocation } from '@/lib/session';
 
 export type WizardStep = "type" | "budget" | "property" | "goals";
 
 export interface InvestmentWizardState {
   currentStep: WizardStep;
+  location: Location;
   investmentType: "buy" | "rent";
   budget: number[];
   propertyType: "apartment" | "house" | "room";
@@ -12,6 +14,7 @@ export interface InvestmentWizardState {
 }
 
 export function useInvestmentWizard(initialLocation: Location) {
+  const [location, setLocation] = useState<Location>(initialLocation);
   const [currentStep, setCurrentStep] = useState<WizardStep>("type");
   const [investmentType, setInvestmentType] = useState<"buy" | "rent">("buy");
   const [budget, setBudget] = useState<number[]>([150000]);
@@ -21,6 +24,18 @@ export function useInvestmentWizard(initialLocation: Location) {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [seed, setSeed] = useState<number>(0);
+
+  // Save wizard state to sessionStorage whenever location or config changes
+  useEffect(() => {
+    saveWizardLocation({
+      location,
+      investmentType,
+      budget: budget[0],
+      propertyType,
+      goals,
+      currentStep,
+    });
+  }, [location, investmentType, budget, propertyType, goals, currentStep]);
 
   // Simulate initialization (e.g. fetching suggestions based on location)
   useEffect(() => {
@@ -79,11 +94,16 @@ export function useInvestmentWizard(initialLocation: Location) {
 
   const getState = (): InvestmentWizardState => ({
     currentStep,
+    location,
     investmentType,
     budget,
     propertyType,
     goals,
   });
+
+  const updateLocation = (newLocation: Location) => {
+    setLocation(newLocation);
+  };
 
   const reinitialize = () => {
     setSeed((s) => s + 1);
@@ -94,6 +114,7 @@ export function useInvestmentWizard(initialLocation: Location) {
   return {
     // state
     currentStep,
+    location,
     investmentType,
     budget,
     propertyType,
@@ -109,6 +130,7 @@ export function useInvestmentWizard(initialLocation: Location) {
     setBudget,
     setPropertyType,
     setGoals,
+    updateLocation,
     // navigation
     next,
     previous,
