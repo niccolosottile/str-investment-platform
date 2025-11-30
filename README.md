@@ -49,9 +49,9 @@ The frontend is ready for integration. Here's what I'm building on the backend:
 
 **Scraping Layer**: Playwright-based scrapers for Airbnb, Booking.com, and VRBO. Handles rate limiting, proxy rotation, and data deduplication. Built in Python because it's the right tool for this job.
 
-**Data Pipeline**: PostgreSQL for structured data (properties, pricing, metrics), Redis for caching (24hr TTL on market analyses), BullMQ for job queues. Standard architecture but important to get right for performance.
+**Data Pipeline**: PostgreSQL for structured data (properties, pricing, metrics), Redis for caching (24hr TTL on market analyses), RabbitMQ for job queues. Standard architecture but important to get right for performance.
 
-**API Layer**: Express/Node.js REST API. Endpoints for location search, nearby opportunities (with driving time filtering), and full investment analysis. Response times under 2s for cached data, under 30s for fresh scraping.
+**API Layer**: Java Spring Boot REST API. Endpoints for location search, nearby opportunities (with driving time filtering), and full investment analysis. Response times under 2s for cached data, under 30s for fresh scraping.
 
 **ML Components**: Working on occupancy prediction models and ROI estimation using historical STR data. Nothing fancy yet, just linear regression and time series forecasting, but it'll improve as I gather more training data.
 
