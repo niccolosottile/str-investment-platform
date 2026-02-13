@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/apiClient';
 
 interface DrivingTimeRequest {
   origin: { lat: number; lng: number };
@@ -20,7 +21,7 @@ async function fetchDrivingTime(
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number }
 ): Promise<DrivingTimeResponse> {
-  const response = await fetch('/api/driving-time', {
+  const response = await apiFetch('/api/driving-time', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

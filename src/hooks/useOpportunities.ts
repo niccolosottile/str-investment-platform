@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { calculateDistance } from '@/lib/utils/distance';
+import { apiFetch } from '@/lib/apiClient';
 import type { 
   OpportunityResult, 
   NearbyLocation, 
@@ -58,7 +59,7 @@ async function fetchNearbyLocations(
     radius: radiusKm.toString(),
   });
 
-  const response = await fetch(`/api/locations/nearby?${params}`);
+  const response = await apiFetch(`/api/locations/nearby?${params}`);
   
   if (!response.ok) {
     const error = await response.json().catch(() => ({ message: response.statusText }));
@@ -76,7 +77,7 @@ async function fetchDrivingTime(
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number }
 ): Promise<{ duration: number; distance: number }> {
-  const response = await fetch('/api/driving-time', {
+  const response = await apiFetch('/api/driving-time', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

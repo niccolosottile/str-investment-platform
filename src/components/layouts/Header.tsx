@@ -1,4 +1,5 @@
 import React, { useId } from "react";
+import { HeaderAuth } from "@/components/auth/HeaderAuth";
 
 interface HeaderProps {
   backElement?: React.ReactNode;
@@ -21,7 +22,10 @@ export const Header = ({ backElement, title = "STR Invest" }: HeaderProps) => {
             <h1 className="text-xl font-bold text-foreground">{title}</h1>
           </div>
 
-          <div>{backElement}</div>
+          <div className="flex items-center gap-3">
+            {backElement}
+            <HeaderAuth />
+          </div>
         </div>
       </header>
 

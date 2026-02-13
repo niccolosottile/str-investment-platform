@@ -9,9 +9,9 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
-      // Proxy API requests to the Express server
+      // Proxy API requests to the Spring backend
       '/api': {
-        target: 'http://localhost:8081',
+        target: 'http://localhost:8080',
         changeOrigin: true,
         secure: false,
       },
