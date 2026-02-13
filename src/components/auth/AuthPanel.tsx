@@ -96,7 +96,7 @@ export const AuthPanel = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 rounded-lg border border-border/60 bg-gradient-to-b from-background via-background to-muted/30 p-4 shadow-lg shadow-black/5">
       <div className="space-y-1">
         <h2 className="text-2xl font-semibold text-foreground">{header.title}</h2>
         <p className="text-sm text-muted-foreground">{header.subtitle}</p>
@@ -108,26 +108,28 @@ export const AuthPanel = ({
           <TabsTrigger value="signup">Sign up</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="signin" className="space-y-4">
+        <TabsContent value="signin" className="space-y-4 rounded-md border border-border/60 bg-background/90 p-4 shadow-md shadow-black/5 ring-1 ring-border/40">
           <form className="space-y-4" onSubmit={handleEmailAuth}>
             <div className="space-y-2">
-              <Label htmlFor="signin-email">Email</Label>
+              <Label htmlFor="signin-email" className="text-foreground">Email</Label>
               <Input
                 id="signin-email"
                 type="email"
                 autoComplete="email"
                 required
+                className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                 value={formState.email}
                 onChange={handleFieldChange("email")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="signin-password">Password</Label>
+              <Label htmlFor="signin-password" className="text-foreground">Password</Label>
               <Input
                 id="signin-password"
                 type="password"
                 autoComplete="current-password"
                 required
+                className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                 value={formState.password}
                 onChange={handleFieldChange("password")}
               />
@@ -147,37 +149,40 @@ export const AuthPanel = ({
           </form>
         </TabsContent>
 
-        <TabsContent value="signup" className="space-y-4">
+        <TabsContent value="signup" className="space-y-4 rounded-md border border-border/60 bg-background/90 p-4 shadow-md shadow-black/5 ring-1 ring-border/40">
           <form className="space-y-4" onSubmit={handleEmailAuth}>
             <div className="space-y-2">
-              <Label htmlFor="signup-name">Full name</Label>
+              <Label htmlFor="signup-name" className="text-foreground">Full name</Label>
               <Input
                 id="signup-name"
                 type="text"
                 autoComplete="name"
                 required
+                className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                 value={formState.fullName}
                 onChange={handleFieldChange("fullName")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="signup-email">Email</Label>
+              <Label htmlFor="signup-email" className="text-foreground">Email</Label>
               <Input
                 id="signup-email"
                 type="email"
                 autoComplete="email"
                 required
+                className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                 value={formState.email}
                 onChange={handleFieldChange("email")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="signup-password">Password</Label>
+              <Label htmlFor="signup-password" className="text-foreground">Password</Label>
               <Input
                 id="signup-password"
                 type="password"
                 autoComplete="new-password"
                 required
+                className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                 value={formState.password}
                 onChange={handleFieldChange("password")}
               />
@@ -189,7 +194,7 @@ export const AuthPanel = ({
         </TabsContent>
       </Tabs>
 
-      <div className="space-y-4">
+      <div className="space-y-4 rounded-md border border-border/60 bg-muted/40 p-4 shadow-md shadow-black/5 ring-1 ring-border/30">
         <div className="flex items-center gap-3">
           <Separator className="flex-1" />
           <span className="text-xs uppercase tracking-wide text-muted-foreground">or continue with</span>

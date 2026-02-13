@@ -97,7 +97,7 @@ const AuthReset = () => {
   return (
     <MainLayout title="STR Invest">
       <div className="mx-auto flex w-full max-w-xl flex-col gap-6 py-10">
-        <Card>
+        <Card className="border-border/70 bg-gradient-to-b from-card via-muted/10 to-muted/40 shadow-xl shadow-black/15 ring-1 ring-border/50">
           <CardContent className="space-y-6 pt-6">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold text-foreground">
@@ -113,12 +113,13 @@ const AuthReset = () => {
             {mode === "request" ? (
               <form className="space-y-4" onSubmit={handleRequestReset}>
                 <div className="space-y-2">
-                  <Label htmlFor="reset-email">Email</Label>
+                  <Label htmlFor="reset-email" className="text-foreground">Email</Label>
                   <Input
                     id="reset-email"
                     type="email"
                     autoComplete="email"
                     required
+                    className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                   />
@@ -130,12 +131,13 @@ const AuthReset = () => {
             ) : (
               <form className="space-y-4" onSubmit={handleUpdatePassword}>
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">New password</Label>
+                  <Label htmlFor="new-password" className="text-foreground">New password</Label>
                   <Input
                     id="new-password"
                     type="password"
                     autoComplete="new-password"
                     required
+                    className="border-border/80 bg-background/90 text-foreground shadow-inner focus-visible:ring-2 focus-visible:ring-primary/30"
                     value={password}
                     onChange={(event) => setPassword(event.target.value)}
                   />

@@ -22,6 +22,12 @@ const getInitials = (name: string | null) => {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 };
 
+const getFullName = (metadata?: Record<string, unknown>) => {
+  if (!metadata) return null;
+  const fullName = metadata.full_name ?? metadata.name;
+  return fullName ? String(fullName) : null;
+};
+
 export const HeaderAuth = () => {
   const { user, displayName, loading, signOut } = useAuth();
 
@@ -33,12 +39,14 @@ export const HeaderAuth = () => {
     return <AuthDialog triggerLabel="Sign in" />;
   }
 
+  const fullName = getFullName(user.user_metadata as Record<string, unknown> | undefined);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="h-9 gap-2 px-2">
           <Avatar className="h-7 w-7">
-            <AvatarFallback>{getInitials(displayName)}</AvatarFallback>
+            <AvatarFallback>{getInitials(fullName ?? displayName)}</AvatarFallback>
           </Avatar>
           <span className="hidden max-w-[120px] truncate text-sm font-medium sm:inline">
             {displayName ?? "Account"}

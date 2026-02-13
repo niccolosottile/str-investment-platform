@@ -26,7 +26,10 @@ const getDisplayName = (user: User | null): string | null => {
   ].filter(Boolean);
 
   if (possible.length > 0) {
-    return String(possible[0]);
+    const fullName = String(possible[0]).trim();
+    if (fullName.length > 0) {
+      return fullName.split(/\s+/)[0];
+    }
   }
 
   if (user.email) {

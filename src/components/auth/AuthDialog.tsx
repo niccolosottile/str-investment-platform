@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AuthPanel } from "@/components/auth/AuthPanel";
 
@@ -22,10 +22,6 @@ export const AuthDialog = ({
         <Button size="sm">{triggerLabel}</Button>
       </DialogTrigger>
       <DialogContent className="max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{subtitle}</DialogDescription>
-        </DialogHeader>
         <AuthPanel
           onSuccess={() => setOpen(false)}
           onForgotPassword={() => setOpen(false)}

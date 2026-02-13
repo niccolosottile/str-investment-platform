@@ -12,17 +12,34 @@ const AuthCallback = () => {
   useEffect(() => {
     const finalize = async () => {
       const params = new URLSearchParams(window.location.search);
-      if (!params.has("code")) {
-        setStatus("error");
-        setMessage("No authentication code found.");
-        return;
-      }
+      if (params.has("code")) {
+        const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+        if (error) {
+          setStatus("error");
+          setMessage(error.message);
+          return;
+        }
+      } else {
+        const hash = window.location.hash.replace(/^#/, "");
+        const hashParams = new URLSearchParams(hash);
+        const accessToken = hashParams.get("access_token");
+        const refreshToken = hashParams.get("refresh_token");
 
-      const { error } = await supabase.auth.exchangeCodeForSession(window.location.href);
-      if (error) {
-        setStatus("error");
-        setMessage(error.message);
-        return;
+        if (accessToken && refreshToken) {
+          const { error } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          });
+          if (error) {
+            setStatus("error");
+            setMessage(error.message);
+            return;
+          }
+        } else {
+          setStatus("error");
+          setMessage("No authentication code found.");
+          return;
+        }
       }
 
       setStatus("success");
