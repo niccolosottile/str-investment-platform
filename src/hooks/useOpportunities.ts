@@ -8,41 +8,35 @@ import type {
   UseOpportunitiesOptions 
 } from '@/types';
 
+interface BackendLocationResponse {
+  id: string;
+  latitude: number;
+  longitude: number;
+  city: string;
+  region: string;
+  country: string;
+  dataQuality: 'HIGH' | 'MEDIUM' | 'LOW';
+  propertyCount?: number;
+}
+
+interface BackendDrivingTimeResponse {
+  distanceKm: number;
+  drivingTimeMinutes: number;
+}
+
 /**
  * Calculate preview metrics for an opportunity based on city and property type
  */
-function calculatePreviewMetrics(city: string): {
+function calculatePreviewMetrics(propertyCount?: number): {
   estimatedMonthlyRevenue: number;
   estimatedROI: number;
 } {
-  const baseRevenue = 2000; // Base €2000/month
-  
-  // Location multipliers from spec
-  const locationMultipliers: Record<string, number> = {
-    'Rome': 1.3,
-    'Barcelona': 1.2,
-    'Amsterdam': 1.4,
-    'Paris': 1.5,
-    'Milan': 1.1,
-    'Lisbon': 1.0,
-  };
-  
-  // Default multiplier for unlisted cities
-  const locationMultiplier = locationMultipliers[city] || 1.0;
-  
-  // Use average property type multiplier (apartment = 1)
-  const propertyMultiplier = 1;
-  
-  const monthlyRevenue = baseRevenue * locationMultiplier * propertyMultiplier;
-  
-  // Estimate ROI based on typical investment (€200k for purchase)
-  const typicalInvestment = 200000;
-  const annualRevenue = monthlyRevenue * 12 * 0.5; // 50% after costs
-  const roi = (annualRevenue / typicalInvestment) * 100;
+  const estimatedMonthlyRevenue = 1500;
+  const estimatedROI = propertyCount && propertyCount > 0 ? Math.max(4, Math.min(12, 12 - propertyCount / 80)) : 8;
   
   return {
-    estimatedMonthlyRevenue: Math.round(monthlyRevenue),
-    estimatedROI: Math.round(roi * 10) / 10, // Round to 1 decimal
+    estimatedMonthlyRevenue,
+    estimatedROI: Math.round(estimatedROI * 10) / 10,
   };
 }
 
@@ -66,8 +60,20 @@ async function fetchNearbyLocations(
     throw new Error(`Failed to fetch nearby locations: ${error.message || response.statusText}`);
   }
   
-  const data = await response.json();
-  return data.locations || [];
+  const data: BackendLocationResponse[] = await response.json();
+
+  return data.map((location) => ({
+    id: location.id,
+    city: location.city,
+    region: location.region,
+    country: location.country,
+    coordinates: {
+      lat: location.latitude,
+      lng: location.longitude,
+    },
+    dataQuality: location.dataQuality.toLowerCase() as 'high' | 'medium' | 'low',
+    propertyCount: location.propertyCount,
+  }));
 }
 
 /**
@@ -82,14 +88,24 @@ async function fetchDrivingTime(
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ origin, destination }),
+    body: JSON.stringify({
+      originLatitude: origin.lat,
+      originLongitude: origin.lng,
+      destinationLatitude: destination.lat,
+      destinationLongitude: destination.lng,
+    }),
   });
 
   if (!response.ok) {
     throw new Error('Failed to fetch driving time');
   }
 
-  return response.json();
+  const data: BackendDrivingTimeResponse = await response.json();
+
+  return {
+    duration: data.drivingTimeMinutes,
+    distance: data.distanceKm,
+  };
 }
 
 /**
@@ -136,25 +152,21 @@ async function enrichLocations(
 
   // Map to OpportunityResult with preview metrics
   return filteredLocations.map(({ location, drivingTimeMin, distanceKm }) => {
-    const previewMetrics = calculatePreviewMetrics(location.city);
-    
-    // Determine data availability (simplified for now)
-    const dataAvailability: 'high' | 'medium' | 'low' = 
-      ['Rome', 'Barcelona', 'Amsterdam', 'Paris', 'Milan', 'Lisbon'].includes(location.city)
-        ? 'high'
-        : 'medium';
+    const previewMetrics = calculatePreviewMetrics(location.propertyCount);
+    const dataAvailability = location.dataQuality;
 
     return {
       id: location.id,
       coordinates: location.coordinates,
       city: location.city,
-      region: '', // Not provided by API yet
+      region: location.region,
       country: location.country,
       distanceKm,
       drivingTimeMin,
       previewMetrics,
       dataAvailability,
       lastUpdated: new Date(),
+      propertyCount: location.propertyCount,
     };
   });
 }

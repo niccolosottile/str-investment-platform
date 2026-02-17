@@ -2,15 +2,17 @@ import { useQuery } from '@tanstack/react-query';
 import { apiFetch } from '@/lib/apiClient';
 
 interface DrivingTimeRequest {
-  origin: { lat: number; lng: number };
-  destination: { lat: number; lng: number };
+  originLatitude: number;
+  originLongitude: number;
+  destinationLatitude: number;
+  destinationLongitude: number;
 }
 
 interface DrivingTimeResponse {
-  duration: number; // minutes
-  distance: number; // km
-  cached: boolean;
-  source: 'api' | 'heuristic';
+  distanceKm: number;
+  drivingTimeMinutes: number;
+  drivingTimeHours: number;
+  calculated: boolean;
 }
 
 /**
@@ -21,12 +23,19 @@ async function fetchDrivingTime(
   origin: { lat: number; lng: number },
   destination: { lat: number; lng: number }
 ): Promise<DrivingTimeResponse> {
+  const requestBody: DrivingTimeRequest = {
+    originLatitude: origin.lat,
+    originLongitude: origin.lng,
+    destinationLatitude: destination.lat,
+    destinationLongitude: destination.lng,
+  };
+
   const response = await apiFetch('/api/driving-time', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ origin, destination }),
+    body: JSON.stringify(requestBody),
   });
 
   if (!response.ok) {
@@ -34,11 +43,7 @@ async function fetchDrivingTime(
     throw new Error(`Driving time API failed: ${error.message || response.statusText}`);
   }
 
-  const data = await response.json();
-  return {
-    ...data,
-    source: 'api' as const,
-  };
+  return response.json();
 }
 
 /**

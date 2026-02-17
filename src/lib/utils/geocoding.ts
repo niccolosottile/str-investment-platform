@@ -23,11 +23,10 @@ export async function geocodeAddress(
   proximity?: { lat: number; lng: number }
 ): Promise<GeocodingResult[]> {
   if (!query.trim()) return [];
-  
-  // Fallback to mock data if no token available
+
   if (!MAPBOX_TOKEN) {
-    console.warn('Mapbox token not configured, using mock geocoding');
-    return getMockGeocodingResults(query);
+    console.warn('Mapbox token not configured for geocoding');
+    return [];
   }
   
   try {
@@ -65,7 +64,7 @@ export async function geocodeAddress(
     }));
   } catch (error) {
     console.error('Geocoding error:', error);
-    return getMockGeocodingResults(query);
+    return [];
   }
 }
 
@@ -80,8 +79,8 @@ export async function reverseGeocode(
   lng: number
 ): Promise<GeocodingResult | null> {
   if (!MAPBOX_TOKEN) {
-    console.warn('Mapbox token not configured, using mock reverse geocoding');
-    return getMockReverseGeocodingResult(lat, lng);
+    console.warn('Mapbox token not configured for reverse geocoding');
+    return null;
   }
   
   try {
@@ -115,7 +114,7 @@ export async function reverseGeocode(
     };
   } catch (error) {
     console.error('Reverse geocoding error:', error);
-    return getMockReverseGeocodingResult(lat, lng);
+    return null;
   }
 }
 
@@ -144,40 +143,4 @@ function extractCountry(feature: any): string {
     c.id.startsWith('country.')
   );
   return countryContext?.text || '';
-}
-
-// Mock implementations for development without API token
-function getMockGeocodingResults(query: string): GeocodingResult[] {
-  const mockLocations = [
-    { city: 'Milan', region: 'Lombardy', country: 'Italy', lat: 45.4642, lng: 9.1900 },
-    { city: 'Turin', region: 'Piedmont', country: 'Italy', lat: 45.0703, lng: 7.6869 },
-    { city: 'Genoa', region: 'Liguria', country: 'Italy', lat: 44.4056, lng: 8.9463 },
-    { city: 'Florence', region: 'Tuscany', country: 'Italy', lat: 43.7696, lng: 11.2558 },
-    { city: 'Bologna', region: 'Emilia-Romagna', country: 'Italy', lat: 44.4949, lng: 11.3426 },
-  ];
-  
-  const matches = mockLocations.filter(loc => 
-    loc.city.toLowerCase().includes(query.toLowerCase()) ||
-    loc.region.toLowerCase().includes(query.toLowerCase())
-  );
-  
-  return (matches.length > 0 ? matches : mockLocations.slice(0, 3)).map(loc => ({
-    coordinates: { lat: loc.lat, lng: loc.lng },
-    address: `${loc.city}, ${loc.region}, ${loc.country}`,
-    city: loc.city,
-    region: loc.region,
-    country: loc.country,
-    placeType: ['place'],
-  }));
-}
-
-function getMockReverseGeocodingResult(lat: number, lng: number): GeocodingResult {
-  return {
-    coordinates: { lat, lng },
-    address: `Location at ${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-    city: 'Unknown City',
-    region: 'Unknown Region',
-    country: 'Italy',
-    placeType: ['place'],
-  };
 }

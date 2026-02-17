@@ -1,41 +1,25 @@
 import { useState, useCallback } from "react";
 import { useUserLocation } from "@/contexts/UserLocationContext";
-import { geocodeAddress } from "@/lib/utils/geocoding";
+import { apiFetch } from "@/lib/apiClient";
 import { enrichLocationWithDistance } from "@/lib/utils/distance";
 import { getRecentSearches, saveRecentSearch } from "@/lib/utils/localStorage";
 import { useAutocomplete } from "@/hooks/useAutocomplete";
-import { useDrivingTime } from "@/hooks/useDrivingTime";
 import type { LocationSearchResult, PopularLocation } from "@/types";
 
-const allEuropeanLocations: PopularLocation[] = [
-  {
-    name: "Barcelona, Spain",
-    description: "High tourist demand, year-round season",
-    metrics: { avgRevenue: "€2,400", occupancy: "82%", competition: "High" },
-    location: { lat: 41.3851, lng: 2.1734, city: "Barcelona", country: "Spain", address: "Barcelona, Spain" },
-  },
-  {
-    name: "Rome, Italy",
-    description: "Historic center, premium pricing",
-    metrics: { avgRevenue: "€2,800", occupancy: "75%", competition: "Medium" },
-    location: { lat: 41.9028, lng: 12.4964, city: "Rome", country: "Italy", address: "Rome, Italy" },
-  },
-  {
-    name: "Lisbon, Portugal",
-    description: "Growing market, digital nomads",
-    metrics: { avgRevenue: "€1,900", occupancy: "88%", competition: "Medium" },
-    location: { lat: 38.7223, lng: -9.1393, city: "Lisbon", country: "Portugal", address: "Lisbon, Portugal" },
-  },
-  {
-    name: "Amsterdam, Netherlands",
-    description: "High-value market, strict regulations",
-    metrics: { avgRevenue: "€3,200", occupancy: "69%", competition: "Very High" },
-    location: { lat: 52.3676, lng: 4.9041, city: "Amsterdam", country: "Netherlands", address: "Amsterdam, Netherlands" },
-  },
-  ];
+interface BackendLocationSearchResult {
+  id: string;
+  latitude: number;
+  longitude: number;
+  city: string;
+  region: string;
+  country: string;
+  fullAddress: string;
+  dataQuality: 'HIGH' | 'MEDIUM' | 'LOW';
+  propertyCount?: number;
+}
 
 export function useLocationSearch() {
-  const { currentLocation, searchRadius, maxDrivingTime } = useUserLocation();
+  const { currentLocation } = useUserLocation();
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [data, setData] = useState<LocationSearchResult[] | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -44,7 +28,7 @@ export function useLocationSearch() {
 
   // Initialize autocomplete hook
   const autocomplete = useAutocomplete(currentLocation);
-  const popularLocations = getNearbyLocations(currentLocation, searchRadius);
+  const popularLocations: PopularLocation[] = [];
   
   // Refresh recent searches when component mounts or after search
   const refreshRecentSearches = useCallback(() => {
@@ -64,50 +48,52 @@ export function useLocationSearch() {
         return [];
       }
 
-      // Use geocoding API
-      const geocodingResults = await geocodeAddress(q, currentLocation || undefined);
+      const params = new URLSearchParams({
+        query: q,
+        limit: '5',
+      });
+
+      const response = await apiFetch(`/api/locations/search?${params.toString()}`);
+
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(payload.message || 'Failed to search locations');
+      }
+
+      const backendResults: BackendLocationSearchResult[] = await response.json();
       
-      if (geocodingResults.length === 0) {
+      if (backendResults.length === 0) {
         setData(null);
         return [];
       }
 
-      // Enrich with distance and filter by radius
-      const enrichedResults: LocationSearchResult[] = geocodingResults
+      // Enrich with distance
+      const enrichedResults: LocationSearchResult[] = backendResults
         .map(result => {
           const distanceData = enrichLocationWithDistance(
-            result.coordinates,
+            {
+              lat: result.latitude,
+              lng: result.longitude,
+            },
             currentLocation
           );
 
           return {
-            coordinates: result.coordinates,
-            address: result.address,
+            id: result.id,
+            coordinates: {
+              lat: result.latitude,
+              lng: result.longitude,
+            },
+            address: result.fullAddress,
             city: result.city,
             region: result.region,
             country: result.country,
             distanceFromUser: distanceData,
-            dataAvailability: getDataAvailability(result.city),
+            dataAvailability: result.dataQuality.toLowerCase() as 'high' | 'medium' | 'low',
             lastUpdated: new Date(),
-            propertyCount: Math.floor(Math.random() * 500) + 50, // Mock data
+            propertyCount: result.propertyCount,
           };
         })
-        // Temporarily disabled - allow searching any location regardless of distance
-        // .filter(result => {
-        //   // Filter by search radius if user location available
-        //   if (currentLocation && result.distanceFromUser) {
-        //     return result.distanceFromUser.km <= searchRadius;
-        //   }
-        //   return true; // Show all if no user location
-        // })
-        // Temporarily disabled - allow searching any location regardless of travel time
-        // .filter(result => {
-        //   // Filter by max driving time
-        //   if (currentLocation && result.distanceFromUser) {
-        //     return result.distanceFromUser.drivingTime <= maxDrivingTime * 60;
-        //   }
-        //   return true;
-        // })
         .sort((a, b) => {
           // Sort by distance if available
           if (a.distanceFromUser && b.distanceFromUser) {
@@ -150,39 +136,4 @@ export function useLocationSearch() {
     recentSearches,
     refreshRecentSearches,
   } as const;
-}
-
-// Get nearby locations based on user position
-function getNearbyLocations(
-  userLocation: { lat: number; lng: number } | null,
-  radius: number
-): PopularLocation[] {
-  if (!userLocation) {
-    // Return default popular locations if no user location
-    return allEuropeanLocations.slice(0, 4);
-  }
-
-  // Calculate distances and filter by radius
-  const locationsWithDistance = allEuropeanLocations
-    .map(loc => {
-      const distance = enrichLocationWithDistance(loc.location, userLocation);
-      return { ...loc, distance };
-    })
-    .filter(loc => loc.distance && loc.distance.km <= radius)
-    .sort((a, b) => (a.distance?.km || 0) - (b.distance?.km || 0));
-
-  // Return top 4 nearest locations, or fallback to default if none nearby
-  return locationsWithDistance.length > 0
-    ? locationsWithDistance.slice(0, 4)
-    : allEuropeanLocations.slice(0, 4);
-}
-
-// Mock data availability indicator
-function getDataAvailability(city: string): 'high' | 'medium' | 'low' {
-  const highDataCities = ['Barcelona', 'Rome', 'Lisbon', 'Amsterdam', 'Milan', 'Florence'];
-  const mediumDataCities = ['Porto', 'Valencia', 'Bologna', 'Turin'];
-  
-  if (highDataCities.some(c => city.includes(c))) return 'high';
-  if (mediumDataCities.some(c => city.includes(c))) return 'medium';
-  return 'low';
 }

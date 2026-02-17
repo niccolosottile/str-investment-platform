@@ -42,7 +42,8 @@ The platform aggregates market data from Airbnb, Booking.com, and VRBO to help i
 - Zod
 
 **APIs:**
-- Mapbox Geocoding (location search)
+- STR backend APIs (`/api/locations`, `/api/driving-time`, `/api/analysis`)
+- Mapbox Geocoding (reverse geocoding / map UX)
 - Browser Geolocation API
 
 ## Running Locally
@@ -54,6 +55,7 @@ npm install
 # Set up environment variables
 cp .env.example .env
 # Add your Mapbox token: VITE_PUBLIC_MAPBOX_TOKEN=your_token_here
+# Add backend base URL: VITE_API_BASE_URL=http://localhost:8080
 
 # Start dev server
 npm run dev

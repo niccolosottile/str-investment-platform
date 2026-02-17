@@ -1,4 +1,5 @@
 export interface Location {
+  id?: string;
   lat: number;
   lng: number;
   city: string;
@@ -43,6 +44,7 @@ export interface InvestmentResults {
 }
 
 export interface LocationSearchResult {
+  id?: string;
   coordinates: { lat: number; lng: number };
   address: string;
   city: string;
@@ -92,8 +94,11 @@ export interface OpportunityResult {
 export interface NearbyLocation {
   id: string;
   city: string;
+  region: string;
   country: string;
   coordinates: { lat: number; lng: number };
+  dataQuality: 'high' | 'medium' | 'low';
+  propertyCount?: number;
 }
 
 export interface OpportunitiesFilters {

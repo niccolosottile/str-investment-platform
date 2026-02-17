@@ -119,6 +119,7 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
   const handleOpportunityAnalyze = useCallback((opportunity: OpportunityResult) => {
     clearResultsData();
     onLocationSelect({
+      id: opportunity.id,
       lat: opportunity.coordinates.lat,
       lng: opportunity.coordinates.lng,
       city: opportunity.city,
@@ -208,11 +209,15 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
             <h2 className="text-3xl font-bold">Popular Investment Markets</h2>
             <p className="text-muted-foreground">Start with proven markets or explore new opportunities</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {popularLocations.map((loc, i) => (
-              <PopularLocationCard key={i} item={loc} onSelect={handlePopularSelect} />
-            ))}
-          </div>
+          {popularLocations.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {popularLocations.map((loc, i) => (
+                <PopularLocationCard key={i} item={loc} onSelect={handlePopularSelect} />
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-muted-foreground">Search for a location to discover opportunities.</p>
+          )}
         </div>
       )}
     </div>
