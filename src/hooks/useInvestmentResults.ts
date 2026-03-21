@@ -14,15 +14,25 @@ interface AnalysisApiResponse {
     acceptsRenovation: boolean;
   };
   metrics: {
+    monthlyRevenueConservative: { amount: number; currency: string };
     monthlyRevenueExpected: { amount: number; currency: string };
+    monthlyRevenueOptimistic: { amount: number; currency: string };
     annualRevenue: { amount: number; currency: string };
     annualROI: number;
     paybackPeriodMonths: number;
     occupancyRate: number;
+    viableInvestment: boolean;
   };
   marketAnalysis: {
     totalListings: number;
+    averageDailyRate: { amount: number; currency: string };
+    averageOccupancyRate: number;
+    estimatedMonthlyRevenue: { amount: number; currency: string };
+    seasonalityIndex: number;
+    growthTrend: string;
+    competitionDensity: string;
   };
+  dataQuality?: string;
   marketScore?: number;
   confidence?: string;
 }
@@ -42,6 +52,37 @@ function mapConfidence(value?: string): InvestmentResults["confidence"] {
   }
 
   return "medium";
+}
+
+function mapDataQuality(value?: string): InvestmentResults["dataQuality"] {
+  const normalized = value?.toLowerCase();
+  if (normalized === "high" || normalized === "low") {
+    return normalized;
+  }
+
+  return "medium";
+}
+
+function mapGrowthTrend(value?: string): InvestmentResults["growthTrend"] {
+  const normalized = value?.toLowerCase();
+  if (normalized === "increasing" || normalized === "declining") {
+    return normalized;
+  }
+
+  return "stable";
+}
+
+function mapCompetitionDensity(value?: string): InvestmentResults["competitionDensity"] {
+  const normalized = value?.toLowerCase();
+  if (normalized === "low" || normalized === "high") {
+    return normalized;
+  }
+
+  return "medium";
+}
+
+function moneyAmount(value?: { amount: number; currency: string }): number {
+  return Math.round(value?.amount || 0);
 }
 
 export function useInvestmentResults(investmentData: InvestmentData) {
@@ -91,15 +132,23 @@ export function useInvestmentResults(investmentData: InvestmentData) {
       }
 
       const data: AnalysisApiResponse = await response.json();
-      const occupancyRatePct = Math.round((data.metrics.occupancyRate || 0) * 100);
+      const averageOccupancyRatePct = Math.round((Number(data.marketAnalysis.averageOccupancyRate) || 0) * 100);
 
       return {
-        monthlyRevenue: Math.round(data.metrics.monthlyRevenueExpected.amount || 0),
-        yearlyRevenue: Math.round(data.metrics.annualRevenue.amount || 0),
+        monthlyRevenueConservative: moneyAmount(data.metrics.monthlyRevenueConservative),
+        monthlyRevenue: moneyAmount(data.metrics.monthlyRevenueExpected),
+        monthlyRevenueOptimistic: moneyAmount(data.metrics.monthlyRevenueOptimistic),
+        yearlyRevenue: moneyAmount(data.metrics.annualRevenue),
         roi: Math.round((data.metrics.annualROI || 0) * 10) / 10,
         paybackMonths: data.metrics.paybackPeriodMonths || 0,
-        occupancyRate: occupancyRatePct,
+        occupancyRate: averageOccupancyRatePct,
         competitorCount: data.marketAnalysis.totalListings || 0,
+        averageDailyRate: moneyAmount(data.marketAnalysis.averageDailyRate),
+        seasonalityIndex: data.marketAnalysis.seasonalityIndex || 0,
+        growthTrend: mapGrowthTrend(data.marketAnalysis.growthTrend),
+        competitionDensity: mapCompetitionDensity(data.marketAnalysis.competitionDensity),
+        viableInvestment: data.metrics.viableInvestment,
+        dataQuality: mapDataQuality(data.dataQuality),
         marketScore: data.marketScore ?? 0,
         confidence: mapConfidence(data.confidence),
       };

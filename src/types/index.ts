@@ -33,12 +33,20 @@ export interface InvestmentData {
 }
 
 export interface InvestmentResults {
+  monthlyRevenueConservative: number;
   monthlyRevenue: number;
+  monthlyRevenueOptimistic: number;
   yearlyRevenue: number;
   roi: number;
   paybackMonths: number;
   occupancyRate: number;
   competitorCount: number;
+  averageDailyRate: number;
+  seasonalityIndex: number;
+  growthTrend: 'increasing' | 'stable' | 'declining';
+  competitionDensity: 'low' | 'medium' | 'high';
+  viableInvestment: boolean;
+  dataQuality: 'high' | 'medium' | 'low';
   marketScore: number;
   confidence: "high" | "medium" | "low";
 }

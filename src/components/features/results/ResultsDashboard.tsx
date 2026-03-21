@@ -41,7 +41,7 @@ export const ResultsDashboard = ({ investmentData }: ResultsDashboardProps) => {
     <div className="max-w-6xl mx-auto space-y-8">
       <ResultsHeader investmentData={investmentData} results={results} />
 
-      <ResultsMetrics investmentData={investmentData} results={results} />
+      <ResultsMetrics results={results} />
 
       <ErrorBoundary onReset={() => setResetKey((k) => k + 1)}>
         <Tabs key={resetKey} defaultValue="market" className="space-y-6">
@@ -49,7 +49,7 @@ export const ResultsDashboard = ({ investmentData }: ResultsDashboardProps) => {
             <TabsTrigger value="market">Market Analysis</TabsTrigger>
             <TabsTrigger value="competition">Competition</TabsTrigger>
             <TabsTrigger value="seasonal">Seasonality</TabsTrigger>
-            <TabsTrigger value="breakdown">Cost Breakdown</TabsTrigger>
+            <TabsTrigger value="breakdown">Summary</TabsTrigger>
           </TabsList>
 
           <TabsContent value="market" className="space-y-6">

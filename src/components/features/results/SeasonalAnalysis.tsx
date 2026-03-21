@@ -4,6 +4,18 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { BarChart3 } from 'lucide-react';
 import type { InvestmentResults } from '@/types';
 
+function getSeasonalityLabel(index: number) {
+  if (index >= 1) {
+    return 'High seasonality';
+  }
+
+  if (index >= 0.5) {
+    return 'Moderate seasonality';
+  }
+
+  return 'Relatively stable demand';
+}
+
 export function SeasonalAnalysis({ results }: { results: InvestmentResults }) {
   return (
     <Card className="card-metric">
@@ -15,22 +27,21 @@ export function SeasonalAnalysis({ results }: { results: InvestmentResults }) {
         <div className="h-48 bg-gradient-to-r from-accent/20 to-primary/10 rounded-lg flex items-center justify-center">
           <div className="text-center space-y-2">
             <BarChart3 className="h-12 w-12 text-primary mx-auto" />
-            <p className="text-muted-foreground">Seasonal chart visualization</p>
-            <p className="text-xs text-muted-foreground">Peak: Jun-Aug (+40%), Low: Nov-Feb (-25%)</p>
+            <p className="text-muted-foreground">Seasonality Index: {results.seasonalityIndex.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground">{getSeasonalityLabel(results.seasonalityIndex)}</p>
           </div>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
           {[
-            { season: 'Spring', months: 'Mar-May', multiplier: '1.1x', color: 'success' },
-            { season: 'Summer', months: 'Jun-Aug', multiplier: '1.4x', color: 'primary' },
-            { season: 'Autumn', months: 'Sep-Nov', multiplier: '0.9x', color: 'warning' },
-            { season: 'Winter', months: 'Dec-Feb', multiplier: '0.7x', color: 'muted' },
-          ].map((season, index) => (
+            { label: 'Average Occupancy', value: `${results.occupancyRate}%` },
+            { label: 'Growth Trend', value: results.growthTrend.charAt(0).toUpperCase() + results.growthTrend.slice(1) },
+            { label: 'Data Quality', value: results.dataQuality.charAt(0).toUpperCase() + results.dataQuality.slice(1) },
+            { label: 'Market Score', value: `${results.marketScore}/100` },
+          ].map((item, index) => (
             <div key={index} className="text-center space-y-2 p-3 rounded-lg bg-muted/20">
-              <div className="font-semibold">{season.season}</div>
-              <div className="text-xs text-muted-foreground">{season.months}</div>
-              <div className="text-lg font-bold">{season.multiplier}</div>
+              <div className="font-semibold">{item.label}</div>
+              <div className="text-lg font-bold">{item.value}</div>
             </div>
           ))}
         </div>

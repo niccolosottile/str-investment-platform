@@ -3,6 +3,11 @@ import React from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Users, CheckCircle } from 'lucide-react';
 import type { InvestmentResults } from '@/types';
+import { formatCurrency } from '@/lib/utils/currency';
+
+function formatEnumLabel(value: string) {
+  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+}
 
 export function CompetitionAnalysis({ results }: { results: InvestmentResults }) {
   return (
@@ -21,30 +26,30 @@ export function CompetitionAnalysis({ results }: { results: InvestmentResults })
             <div className="text-xs text-muted-foreground">Total Competitors</div>
           </div>
           <div className="text-center space-y-2">
-            <div className="text-2xl font-bold text-warning">€1,950</div>
-            <div className="text-xs text-muted-foreground">Avg. Price</div>
+            <div className="text-2xl font-bold text-warning">{formatCurrency(results.averageDailyRate)}</div>
+            <div className="text-xs text-muted-foreground">Avg. Daily Rate</div>
           </div>
           <div className="text-center space-y-2">
-            <div className="text-2xl font-bold text-success">4.3★</div>
-            <div className="text-xs text-muted-foreground">Avg. Rating</div>
+            <div className="text-2xl font-bold text-success">{formatEnumLabel(results.competitionDensity)}</div>
+            <div className="text-xs text-muted-foreground">Competition Density</div>
           </div>
           <div className="text-center space-y-2">
-            <div className="text-2xl font-bold text-primary">{'72%'}</div>
+            <div className="text-2xl font-bold text-primary">{`${results.occupancyRate}%`}</div>
             <div className="text-xs text-muted-foreground">Avg. Occupancy</div>
           </div>
         </div>
 
         <div className="space-y-3 mt-6">
-          <h4 className="font-semibold">Competitive Advantages</h4>
+          <h4 className="font-semibold">Observed Signals</h4>
           {[
-            'Premium pricing justified by location',
-            'Higher occupancy rate potential',
-            'Modern amenities gap in market',
-            'Better guest experience opportunity',
-          ].map((advantage, index) => (
+            `Expected monthly revenue: ${formatCurrency(results.monthlyRevenue)}`,
+            `Growth trend: ${formatEnumLabel(results.growthTrend)}`,
+            `Analysis data quality: ${formatEnumLabel(results.dataQuality)}`,
+            `Expected occupancy: ${results.occupancyRate}%`,
+          ].map((signal, index) => (
             <div key={index} className="flex items-center space-x-2">
               <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
-              <span className="text-sm">{advantage}</span>
+              <span className="text-sm">{signal}</span>
             </div>
           ))}
         </div>

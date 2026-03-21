@@ -2,11 +2,11 @@
 import React from 'react';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { TrendingUp, DollarSign, Target, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import type { InvestmentResults, InvestmentData } from '@/types';
+import { DollarSign, Target, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import type { InvestmentResults } from '@/types';
 import { formatCurrency } from '@/lib/utils/currency';
 
-export function ResultsMetrics({ investmentData, results }: { investmentData: InvestmentData; results: InvestmentResults }) {
+export function ResultsMetrics({ results }: { results: InvestmentResults }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card className="card-metric">
@@ -16,18 +16,14 @@ export function ResultsMetrics({ investmentData, results }: { investmentData: In
         </CardHeader>
         <CardContent>
           <div className="metric-large mb-2">{formatCurrency(results.monthlyRevenue)}</div>
-          <div className="flex items-center space-x-1 text-sm">
-            <TrendingUp className="h-3 w-3 text-success" />
-            <span className="text-success font-medium">+12.5%</span>
-            <span className="text-muted-foreground">vs market avg</span>
-          </div>
+          <div className="text-sm text-muted-foreground">Expected monthly revenue from the current analysis model</div>
           <div className="mt-3 space-y-1">
             <div className="flex justify-between text-xs">
               <span>Conservative</span>
               <span>Optimistic</span>
             </div>
             <div className="text-xs text-muted-foreground">
-              {formatCurrency(Math.round(results.monthlyRevenue * 0.8))} - {formatCurrency(Math.round(results.monthlyRevenue * 1.3))}
+              {formatCurrency(results.monthlyRevenueConservative)} - {formatCurrency(results.monthlyRevenueOptimistic)}
             </div>
           </div>
         </CardContent>
@@ -41,26 +37,26 @@ export function ResultsMetrics({ investmentData, results }: { investmentData: In
         <CardContent>
           <div className="metric-large mb-2">{`${results.roi}%`}</div>
           <div className="flex items-center space-x-1 text-sm">
-            {results.roi > 15 ? (
+            {results.viableInvestment ? (
               <>
                 <CheckCircle className="h-3 w-3 text-success" />
-                <span className="text-success font-medium">Excellent</span>
+                <span className="text-success font-medium">Viable investment</span>
               </>
-            ) : results.roi > 8 ? (
+            ) : results.confidence !== 'low' ? (
               <>
                 <Clock className="h-3 w-3 text-warning" />
-                <span className="text-warning font-medium">Good</span>
+                <span className="text-warning font-medium">Needs closer review</span>
               </>
             ) : (
               <>
                 <AlertTriangle className="h-3 w-3 text-destructive" />
-                <span className="text-destructive font-medium">Consider alternatives</span>
+                <span className="text-destructive font-medium">Low-confidence outcome</span>
               </>
             )}
           </div>
           <div className="mt-3">
             <Progress value={Math.min(results.roi * 2, 100)} className="h-2" />
-            <div className="text-xs text-muted-foreground mt-1">Target: 12-20% for STR investments</div>
+            <div className="text-xs text-muted-foreground mt-1">Confidence: {results.confidence}</div>
           </div>
         </CardContent>
       </Card>
@@ -77,7 +73,8 @@ export function ResultsMetrics({ investmentData, results }: { investmentData: In
             <span className="text-muted-foreground">{results.paybackMonths < 60 ? 'Fast recovery' : 'Long-term investment'}</span>
           </div>
           <div className="mt-3 space-y-1">
-            <div className="text-xs text-muted-foreground">Monthly cash flow: {formatCurrency(Math.round(results.monthlyRevenue * 0.7))}</div>
+            <div className="text-xs text-muted-foreground">Annual revenue: {formatCurrency(results.yearlyRevenue)}</div>
+            <div className="text-xs text-muted-foreground">Expected occupancy: {results.occupancyRate}%</div>
           </div>
         </CardContent>
       </Card>
