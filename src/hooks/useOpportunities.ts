@@ -19,11 +19,6 @@ interface BackendLocationResponse {
   propertyCount?: number;
 }
 
-interface BackendDrivingTimeResponse {
-  distanceKm: number;
-  drivingTimeMinutes: number;
-}
-
 /**
  * Calculate preview metrics for an opportunity based on city and property type
  */
@@ -74,47 +69,6 @@ async function fetchNearbyLocations(
 }
 
 /**
- * Fetch driving time for a single location
- */
-async function fetchDrivingTime(
-  origin: { lat: number; lng: number },
-  destination: { lat: number; lng: number }
-): Promise<{ duration: number; distance: number }> {
-  const response = await apiFetch('/api/driving-time', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      originLatitude: origin.lat,
-      originLongitude: origin.lng,
-      destinationLatitude: destination.lat,
-      destinationLongitude: destination.lng,
-    }),
-  });
-
-  if (!response.ok) {
-    throw new Error('Failed to fetch driving time');
-  }
-
-  const data: BackendDrivingTimeResponse = await response.json();
-
-  if (
-    typeof data.drivingTimeMinutes !== 'number' ||
-    !Number.isFinite(data.drivingTimeMinutes) ||
-    typeof data.distanceKm !== 'number' ||
-    !Number.isFinite(data.distanceKm)
-  ) {
-    throw new Error('Driving time response missing usable values');
-  }
-
-  return {
-    duration: data.drivingTimeMinutes,
-    distance: data.distanceKm,
-  };
-}
-
-/**
  * Enrich locations with driving time data and preview metrics
  */
 async function enrichLocations(
@@ -123,33 +77,22 @@ async function enrichLocations(
   maxDrivingTimeMin: number,
   devMode: boolean
 ): Promise<OpportunityResult[]> {
-  // Batch fetch driving times in parallel
-  const drivingTimePromises = locations.map(async (location) => {
-    try {
-      const drivingData = await fetchDrivingTime(origin, location.coordinates);
-      return {
-        location,
-        drivingTimeMin: drivingData.duration,
-        distanceKm: drivingData.distance,
-      };
-    } catch (error) {
-      // Fallback to distance calculation if driving time fails
-      const distance = calculateDistance(
-        origin.lat,
-        origin.lng,
-        location.coordinates.lat,
-        location.coordinates.lng
-      );
-      
-      return {
-        location,
-        drivingTimeMin: estimateDrivingTime(distance),
-        distanceKm: Math.round(distance * 10) / 10,
-      };
-    }
-  });
+  // Use local heuristics for browse-time opportunity previews.
+  // Exact routing can be fetched later for a specific destination when needed.
+  const enrichedLocations = locations.map((location) => {
+    const distance = calculateDistance(
+      origin.lat,
+      origin.lng,
+      location.coordinates.lat,
+      location.coordinates.lng
+    );
 
-  const enrichedLocations = await Promise.all(drivingTimePromises);
+    return {
+      location,
+      drivingTimeMin: estimateDrivingTime(distance),
+      distanceKm: Math.round(distance * 10) / 10,
+    };
+  });
 
   // Filter by driving time (unless devMode)
   const filteredLocations = devMode
