@@ -82,7 +82,7 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
       city: opp.city,
       region: opp.region,
       country: opp.country,
-      price: opp.previewMetrics.estimatedMonthlyRevenue,
+      price: opp.previewMetrics.estimatedMonthlyRevenue ?? undefined,
       currency: 'EUR'
     }));
   }, [opportunities]);

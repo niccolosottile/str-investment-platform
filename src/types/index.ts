@@ -91,8 +91,8 @@ export interface OpportunityResult {
   distanceKm: number;
   drivingTimeMin: number;
   previewMetrics: {
-    estimatedMonthlyRevenue: number;
-    estimatedROI: number;
+    estimatedMonthlyRevenue: number | null;
+    estimatedROI: number | null;
   };
   dataAvailability: 'high' | 'medium' | 'low';
   lastUpdated?: Date;

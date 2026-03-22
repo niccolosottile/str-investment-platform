@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Car, TrendingUp, DollarSign } from 'lucide-react';
+import { Car, TrendingUp } from 'lucide-react';
 import { cn } from '@/lib/utils/utils';
 import { formatCurrency } from '@/lib/utils/currency';
 import { formatDrivingTime } from '@/lib/utils/distance';
@@ -21,7 +21,11 @@ export const OpportunityCard = memo(function OpportunityCard({
   onClick,
   onAnalyze
 }: OpportunityCardProps) {
-  const drivingTimeText = formatDrivingTime(opportunity.drivingTimeMin);
+  const drivingTimeText = Number.isFinite(opportunity.drivingTimeMin)
+    ? formatDrivingTime(opportunity.drivingTimeMin)
+    : 'Drive time unavailable';
+  const estimatedRevenue = opportunity.previewMetrics.estimatedMonthlyRevenue;
+  const estimatedRoi = opportunity.previewMetrics.estimatedROI;
 
   return (
     <Card
@@ -54,11 +58,11 @@ export const OpportunityCard = memo(function OpportunityCard({
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <DollarSign className="h-3 w-3" />
+              <span className="text-[10px] font-semibold leading-none">EUR</span>
               <span>Est. Revenue</span>
             </div>
             <p className="text-base font-semibold text-foreground">
-              {formatCurrency(opportunity.previewMetrics.estimatedMonthlyRevenue)}/mo
+              {estimatedRevenue !== null ? `${formatCurrency(estimatedRevenue)}/mo` : 'No data yet'}
             </p>
           </div>
 
@@ -68,7 +72,7 @@ export const OpportunityCard = memo(function OpportunityCard({
               <span>Est. ROI</span>
             </div>
             <p className="text-base font-semibold text-primary">
-              {opportunity.previewMetrics.estimatedROI.toFixed(1)}%
+              {estimatedRoi !== null ? `${estimatedRoi.toFixed(1)}%` : 'No data yet'}
             </p>
           </div>
         </div>

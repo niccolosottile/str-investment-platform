@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { calculateDistance } from '@/lib/utils/distance';
+import { calculateDistance, estimateDrivingTime } from '@/lib/utils/distance';
 import { apiFetch } from '@/lib/apiClient';
 import type { 
   OpportunityResult, 
@@ -28,15 +28,12 @@ interface BackendDrivingTimeResponse {
  * Calculate preview metrics for an opportunity based on city and property type
  */
 function calculatePreviewMetrics(propertyCount?: number): {
-  estimatedMonthlyRevenue: number;
-  estimatedROI: number;
+  estimatedMonthlyRevenue: number | null;
+  estimatedROI: number | null;
 } {
-  const estimatedMonthlyRevenue = 1500;
-  const estimatedROI = propertyCount && propertyCount > 0 ? Math.max(4, Math.min(12, 12 - propertyCount / 80)) : 8;
-  
   return {
-    estimatedMonthlyRevenue,
-    estimatedROI: Math.round(estimatedROI * 10) / 10,
+    estimatedMonthlyRevenue: null,
+    estimatedROI: null,
   };
 }
 
@@ -102,6 +99,15 @@ async function fetchDrivingTime(
 
   const data: BackendDrivingTimeResponse = await response.json();
 
+  if (
+    typeof data.drivingTimeMinutes !== 'number' ||
+    !Number.isFinite(data.drivingTimeMinutes) ||
+    typeof data.distanceKm !== 'number' ||
+    !Number.isFinite(data.distanceKm)
+  ) {
+    throw new Error('Driving time response missing usable values');
+  }
+
   return {
     duration: data.drivingTimeMinutes,
     distance: data.distanceKm,
@@ -137,7 +143,7 @@ async function enrichLocations(
       
       return {
         location,
-        drivingTimeMin: Math.round(distance / 60 * 60), // Rough estimate: 60 km/h avg
+        drivingTimeMin: estimateDrivingTime(distance),
         distanceKm: Math.round(distance * 10) / 10,
       };
     }
