@@ -26,6 +26,7 @@ export const OpportunityCard = memo(function OpportunityCard({
     : 'Drive time unavailable';
   const estimatedRevenue = opportunity.previewMetrics.estimatedMonthlyRevenue;
   const estimatedRoi = opportunity.previewMetrics.estimatedROI;
+  const hasScrapedData = (opportunity.propertyCount ?? 0) > 0;
 
   return (
     <Card
@@ -84,9 +85,15 @@ export const OpportunityCard = memo(function OpportunityCard({
           }}
           className="w-full"
           size="sm"
+          disabled={!hasScrapedData}
         >
-          Analyze Investment
+          {hasScrapedData ? 'Analyze Investment' : 'Analysis Coming Soon'}
         </Button>
+        {!hasScrapedData && (
+          <p className="text-xs text-muted-foreground">
+            We are still collecting enough live market data for this location to unlock analysis.
+          </p>
+        )}
       </CardContent>
     </Card>
   );

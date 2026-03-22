@@ -19,6 +19,7 @@ interface ResultsDashboardProps {
 export const ResultsDashboard = ({ investmentData }: ResultsDashboardProps) => {
   const [resetKey, setResetKey] = useState(0);
   const { data: results, isLoading, error, refetch } = useInvestmentResults(investmentData);
+  const errorMessage = error instanceof Error ? error.message : 'Failed to load investment analysis.';
 
   if (isLoading) {
     return (
@@ -31,7 +32,7 @@ export const ResultsDashboard = ({ investmentData }: ResultsDashboardProps) => {
   if (error || !results) {
     return (
       <div className="max-w-6xl mx-auto py-12 text-center space-y-4">
-        <p className="text-destructive">Failed to load analysis results.</p>
+        <p className="text-destructive">{errorMessage}</p>
         <Button onClick={() => refetch()}>Retry</Button>
       </div>
     );
