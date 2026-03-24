@@ -26,6 +26,7 @@ export const OpportunityCard = memo(function OpportunityCard({
     : 'Drive time unavailable';
   const estimatedRevenue = opportunity.previewMetrics.estimatedMonthlyRevenue;
   const estimatedRoi = opportunity.previewMetrics.estimatedROI;
+  const estimatedRoiRange = opportunity.previewMetrics.estimatedROIRange;
   const hasScrapedData = (opportunity.propertyCount ?? 0) > 0;
 
   return (
@@ -70,10 +71,14 @@ export const OpportunityCard = memo(function OpportunityCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3" />
-              <span>Est. ROI</span>
+              <span>Est. ROI <span className="opacity-60">(€200k)</span></span>
             </div>
             <p className="text-base font-semibold text-primary">
-              {estimatedRoi !== null ? `${estimatedRoi.toFixed(1)}%` : 'No data yet'}
+              {estimatedRoi !== null
+                ? `${estimatedRoi.toFixed(1)}%`
+                : estimatedRoiRange !== null
+                  ? `~${estimatedRoiRange.min}–${estimatedRoiRange.max}%`
+                  : 'No data yet'}
             </p>
           </div>
         </div>

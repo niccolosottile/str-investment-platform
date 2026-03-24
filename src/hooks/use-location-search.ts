@@ -68,6 +68,7 @@ export function useLocationSearch() {
       }
 
       // Enrich with distance
+      // Preserve backend relevance ordering — distance is informational only
       const enrichedResults: LocationSearchResult[] = backendResults
         .map(result => {
           const distanceData = enrichLocationWithDistance(
@@ -93,13 +94,6 @@ export function useLocationSearch() {
             lastUpdated: new Date(),
             propertyCount: result.propertyCount,
           };
-        })
-        .sort((a, b) => {
-          // Sort by distance if available
-          if (a.distanceFromUser && b.distanceFromUser) {
-            return a.distanceFromUser.km - b.distanceFromUser.km;
-          }
-          return 0;
         });
 
       // Save first result to recent searches if available

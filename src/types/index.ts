@@ -93,6 +93,7 @@ export interface OpportunityResult {
   previewMetrics: {
     estimatedMonthlyRevenue: number | null;
     estimatedROI: number | null;
+    estimatedROIRange: { min: number; max: number } | null;
   };
   dataAvailability: 'high' | 'medium' | 'low';
   lastUpdated?: Date;
@@ -107,6 +108,7 @@ export interface NearbyLocation {
   coordinates: { lat: number; lng: number };
   dataQuality: 'high' | 'medium' | 'low';
   propertyCount?: number;
+  averagePrice?: number;
 }
 
 export interface OpportunitiesFilters {

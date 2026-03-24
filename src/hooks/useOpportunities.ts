@@ -17,19 +17,37 @@ interface BackendLocationResponse {
   country: string;
   dataQuality: 'HIGH' | 'MEDIUM' | 'LOW';
   propertyCount?: number;
+  averagePrice?: number;
 }
 
 /**
- * Calculate preview metrics for an opportunity based on city and property type
+ * Calculate preview metrics from the average daily rate stored on the location.
+ * Formula mirrors the backend: ADR × 30 days × 65% occupancy × 0.75 net margin.
+ * ROI is left null — it requires a user-supplied budget.
  */
-function calculatePreviewMetrics(propertyCount?: number): {
+function calculatePreviewMetrics(averagePrice?: number): {
   estimatedMonthlyRevenue: number | null;
   estimatedROI: number | null;
+  estimatedROIRange: { min: number; max: number } | null;
 } {
-  return {
-    estimatedMonthlyRevenue: null,
-    estimatedROI: null,
+  if (!averagePrice || averagePrice <= 0) {
+    return { estimatedMonthlyRevenue: null, estimatedROI: null, estimatedROIRange: null };
+  }
+  const NET_MARGIN = 0.75;
+  const ASSUMED_INVESTMENT = 200_000;
+
+  // Expected monthly revenue at 65% occupancy (used for the card headline figure)
+  const estimatedMonthlyRevenue = Math.round(averagePrice * 30 * 0.65 * NET_MARGIN);
+
+  // ROI range: conservative (55% occupancy) → optimistic (75% occupancy)
+  const annualRevenueMin = averagePrice * 30 * 0.55 * NET_MARGIN * 12;
+  const annualRevenueMax = averagePrice * 30 * 0.75 * NET_MARGIN * 12;
+  const estimatedROIRange = {
+    min: Math.round((annualRevenueMin / ASSUMED_INVESTMENT) * 100 * 10) / 10,
+    max: Math.round((annualRevenueMax / ASSUMED_INVESTMENT) * 100 * 10) / 10,
   };
+
+  return { estimatedMonthlyRevenue, estimatedROI: null, estimatedROIRange };
 }
 
 /**
@@ -65,6 +83,7 @@ async function fetchNearbyLocations(
     },
     dataQuality: location.dataQuality.toLowerCase() as 'high' | 'medium' | 'low',
     propertyCount: location.propertyCount,
+    averagePrice: location.averagePrice,
   }));
 }
 
@@ -101,7 +120,7 @@ async function enrichLocations(
 
   // Map to OpportunityResult with preview metrics
   return filteredLocations.map(({ location, drivingTimeMin, distanceKm }) => {
-    const previewMetrics = calculatePreviewMetrics(location.propertyCount);
+    const previewMetrics = calculatePreviewMetrics(location.averagePrice);
     const dataAvailability = location.dataQuality;
 
     return {
