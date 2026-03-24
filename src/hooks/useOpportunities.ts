@@ -34,7 +34,7 @@ function calculatePreviewMetrics(averagePrice?: number): {
     return { estimatedMonthlyRevenue: null, estimatedROI: null, estimatedROIRange: null };
   }
   const NET_MARGIN = 0.75;
-  const ASSUMED_INVESTMENT = 200_000;
+  const ASSUMED_INVESTMENT = 250_000;
 
   // Expected monthly revenue at 65% occupancy (used for the card headline figure)
   const estimatedMonthlyRevenue = Math.round(averagePrice * 30 * 0.65 * NET_MARGIN);

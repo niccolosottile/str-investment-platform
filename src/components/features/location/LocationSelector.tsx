@@ -117,6 +117,13 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
   }, []);
 
   const handleOpportunityAnalyze = useCallback((opportunity: OpportunityResult) => {
+    // Select the card and fly the map to it before navigating
+    setSelectedOpportunityId(opportunity.id);
+    setMapCenterOverride({
+      lat: opportunity.coordinates.lat,
+      lng: opportunity.coordinates.lng,
+      zoom: 9,
+    });
     clearResultsData();
     onLocationSelect({
       id: opportunity.id,

@@ -71,7 +71,7 @@ export const OpportunityCard = memo(function OpportunityCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1 text-xs text-muted-foreground">
               <TrendingUp className="h-3 w-3" />
-              <span>Est. ROI <span className="opacity-60">(€200k)</span></span>
+              <span>Est. ROI <span className="opacity-60">(€250k)</span></span>
             </div>
             <p className="text-base font-semibold text-primary">
               {estimatedRoi !== null
