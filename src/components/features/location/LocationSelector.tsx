@@ -48,6 +48,9 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
   );
   const [mapCenterOverride, setMapCenterOverride] = useState<{ lat: number; lng: number; zoom?: number } | null>(null);
 
+  // Set to the city name after a fresh search so the first matching opportunity gets auto-selected
+  const pendingAutoSelect = useRef<string | null>(null);
+
   // Ref for scrolling to results
   const resultsRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +76,22 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
     enabled: !!(searchCenter || currentLocation),
   });
 
+  // Auto-select the searched city's opportunity once the list loads
+  useEffect(() => {
+    if (!pendingAutoSelect.current || opportunitiesLoading || !opportunities?.length) return;
+    const cityName = pendingAutoSelect.current;
+    pendingAutoSelect.current = null;
+    const match =
+      opportunities.find(opp => opp.city.toLowerCase() === cityName.toLowerCase()) ??
+      opportunities[0];
+    setSelectedOpportunityId(match.id);
+    setMapCenterOverride({
+      lat: match.coordinates.lat,
+      lng: match.coordinates.lng,
+      zoom: 9,
+    });
+  }, [opportunities, opportunitiesLoading]);
+
   // Convert OpportunityResult[] to OpportunityMarker[] for map
   const mapMarkers = useMemo<OpportunityMarker[]>(() => {
     if (!opportunities) return [];
@@ -89,11 +108,13 @@ export const LocationSelector = memo(function LocationSelector({ onLocationSelec
 
   const handleSearch = useCallback(async () => {
     clearResultsData();
+    setSelectedOpportunityId(null);
     const result = await search();
     if (result && result.length > 0) {
       setSearchCenter({ lat: result[0].coordinates.lat, lng: result[0].coordinates.lng });
       setSearchedCityName(result[0].city);
-      setMapCenterOverride(null); // Clear override when searching
+      setMapCenterOverride(null);
+      pendingAutoSelect.current = result[0].city;
     }
   }, [search]);
 
